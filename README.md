@@ -12,6 +12,8 @@ By default will catch any *Exception* and use retry logic once, has parameters t
   * List of *Throwables* that will be caught and retried. Other exceptions will still throw.
 * excludes
   * List of *Throwables* that will **not** be caught and retried. Other exceptions will not throw.
+  
+...See [Test](https://github.com/aataylor95/retry-ast/blob/master/src/test/groovy/com/github/aataylor95/ast/RetryASTTransformationSpec.groovy) for more documentation.
 
 
 
