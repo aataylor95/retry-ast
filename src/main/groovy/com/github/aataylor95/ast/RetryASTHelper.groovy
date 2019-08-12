@@ -13,7 +13,7 @@ import static org.codehaus.groovy.ast.ClassHelper.make
 import static org.codehaus.groovy.ast.tools.GeneralUtils.*
 
 class RetryASTHelper {
-  static final String RETRIES = '$retries'
+  static final String RETRIES = '$retryCount'
   static final Closure<Boolean> nonException = { ClassNode c -> !(Class.forName(c.name) in Throwable) }
 
   //Add a retry method to the method owner with an extra parameter for $retries (overloading the original method)
