@@ -16,7 +16,7 @@ class RetryASTSidecar {
   static final String RETRIES = '$retryCount'
   static final Closure<Boolean> nonException = { ClassNode c -> !(Class.forName(c.name) in Throwable) }
 
-  //Add a retry method to the method owner with an extra parameter for $retries (overloading the original method)
+  //Add a retry method to the method owner with an extra parameter for $retryCount (overloading the original method)
   static MethodNode createRetryMethod(MethodNode method) {
     Parameter[] newParams = params(*method.parameters, param(make(Integer), RETRIES))
 
@@ -27,7 +27,7 @@ class RetryASTSidecar {
     return retryMethod
   }
 
-  //Will call retry method with $retries + 1
+  //Will call retry method with $retryCount + 1
   static BlockStatement createRetryCall(MethodNode method, boolean initialMethod = false) {
     List<Expression> parameters = method.parameters.collect { varX(it.name) }
     parameters << (initialMethod ? constX(0) : plusX(varX(RETRIES), constX(1)))
