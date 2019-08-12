@@ -13,7 +13,7 @@ import org.codehaus.groovy.transform.AbstractASTTransformation
 import org.codehaus.groovy.transform.GroovyASTTransformation
 
 import static org.codehaus.groovy.ast.tools.GeneralUtils.block
-import static com.github.aataylor95.ast.RetryASTHelper.*
+import static RetryASTSidecar.*
 
 @GroovyASTTransformation(phase=CompilePhase.CANONICALIZATION)
 class RetryASTTransformation extends AbstractASTTransformation {

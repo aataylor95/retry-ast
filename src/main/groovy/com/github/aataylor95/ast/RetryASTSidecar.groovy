@@ -12,7 +12,7 @@ import org.codehaus.groovy.ast.stmt.TryCatchStatement
 import static org.codehaus.groovy.ast.ClassHelper.make
 import static org.codehaus.groovy.ast.tools.GeneralUtils.*
 
-class RetryASTHelper {
+class RetryASTSidecar {
   static final String RETRIES = '$retryCount'
   static final Closure<Boolean> nonException = { ClassNode c -> !(Class.forName(c.name) in Throwable) }
 
