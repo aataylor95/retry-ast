@@ -13,12 +13,12 @@ import static org.codehaus.groovy.ast.ClassHelper.make
 import static org.codehaus.groovy.ast.tools.GeneralUtils.*
 
 class RetryASTHelper {
-  static final String MAX_RETRIES = 'maxRetries'
+  static final String RETRIES = '$retries'
   static final Closure<Boolean> nonException = { ClassNode c -> !(Class.forName(c.name) in Throwable) }
 
-  //Add a retry method to the method owner with an extra parameter for maxRetries (overloading the original method)
+  //Add a retry method to the method owner with an extra parameter for $retries (overloading the original method)
   static MethodNode createRetryMethod(MethodNode method) {
-    Parameter[] newParams = params(*method.parameters, param(make(Integer), MAX_RETRIES))
+    Parameter[] newParams = params(*method.parameters, param(make(Integer), RETRIES))
 
     MethodNode retryMethod = method.with { new MethodNode(name, modifiers, returnType, newParams, exceptions, method.code) }
 
@@ -27,10 +27,10 @@ class RetryASTHelper {
     return retryMethod
   }
 
-  //Will call retry method with maxRetries + 1
+  //Will call retry method with $retries + 1
   static BlockStatement createRetryCall(MethodNode method, boolean initialMethod = false) {
     List<Expression> parameters = method.parameters.collect { varX(it.name) }
-    parameters << (initialMethod ? constX(0) : plusX(varX(MAX_RETRIES), constX(1)))
+    parameters << (initialMethod ? constX(0) : plusX(varX(RETRIES), constX(1)))
 
     return block(stmt(callThisX(method.name, args(parameters))))
   }
@@ -49,7 +49,7 @@ class RetryASTHelper {
       return catchS(exceptionParam, retryCall)
     }
 
-    return catchS(exceptionParam, ifElseS(ltX(varX(MAX_RETRIES), constX(maxRetries - 1)), retryCall, throwS(varX(exceptionName))))
+    return catchS(exceptionParam, ifElseS(ltX(varX(RETRIES), constX(maxRetries - 1)), retryCall, throwS(varX(exceptionName))))
   }
 
   //Create a catch for exception that re-throws exception; for retrying all exceptions except excludes

@@ -26,7 +26,7 @@ class RetryASTTransformation extends AbstractASTTransformation {
     MethodNode method = (MethodNode)nodes[1]
 
     //TODO: Why is it null when nothing is set, when default is 1?
-    Integer maxRetries = getMemberIntValue(anno, MAX_RETRIES) ?: 1
+    Integer maxRetries = getMemberIntValue(anno, 'maxRetries') ?: 1
 
     Closure error = this.&addError.rcurry(method)
 
