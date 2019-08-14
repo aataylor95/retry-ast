@@ -85,7 +85,7 @@ publishing {
       }
       groupId group
       artifactId projectName
-      version '1.0.0'
+      version '1.0.1'
       pom.withXml {
         def root = asNode()
         root.appendNode('description', 'Adds retry logic to methods using a Groovy AST Transformation')
@@ -119,10 +119,10 @@ bintray {
     userOrg = 'aataylor95'
     
     version {
-      name = '1.0.0'
+      name = '1.0.1'
       desc = 'Adds retry logic to methods using a Groovy AST Transformation'
       released = new Date()
-      vcsTag = '1.0.0'
+      vcsTag = '1.0.1'
     }
   }
 }
