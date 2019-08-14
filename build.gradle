@@ -1,11 +1,32 @@
-apply plugin: 'java'
-apply plugin: 'groovy'
-apply plugin: 'application'
+buildscript {
+  repositories {
+    mavenLocal()
+    mavenCentral()
+    jcenter()
+  }
+  dependencies {
+    classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.+'
+  }
+}
 
+apply plugin: 'com.jfrog.bintray'
+
+apply plugin: 'groovy'
+
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+
+apply plugin: 'application'
 apply plugin: 'idea'
 
+repositories {
+  mavenLocal()
+  mavenCentral()
+  jcenter()
+}
+
 dependencies {
-  compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.5.7', ext: 'pom'
+  compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.5.7'
 
   testCompile ('org.spockframework:spock-core:1.1-groovy-2.4') {
     exclude module: 'groovy-all'
@@ -15,6 +36,85 @@ dependencies {
 group projectGroup
 version projectVersion
 
-repositories {
-  mavenCentral()
+task sourcesJar(type: Jar, dependsOn: classes) {
+  classifier = 'sources'
+  from sourceSets.main.allSource
+}
+
+javadoc.failOnError = false
+task javadocJar(type: Jar, dependsOn: javadoc) {
+  classifier = 'javadoc'
+  from javadoc.destinationDir
+}
+
+artifacts {
+  archives sourcesJar
+  archives javadocJar
+}
+
+def pomConfig = {
+  licenses {
+    license {
+      name "DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE Version 2"
+      url "http://www.wtfpl.net/"
+      distribution "repo"
+    }
+  }
+  developers {
+    developer {
+      id "aataylor95"
+      email "a.taylor95@hotmail.com"
+      name "Adam Taylor"
+    }
+  }
+
+  scm {
+    url "https://github.com/aataylor95/retry-ast"
+  }
+}
+
+publishing {
+  publications {
+    mavenPublication(MavenPublication) {
+      from components.java
+      artifact sourcesJar {
+        classifier "sources"
+      }
+      artifact javadocJar {
+        classifier "javadoc"
+      }
+      groupId group
+      artifactId projectName
+      version '1.0.0'
+      pom.withXml {
+        def root = asNode()
+        root.appendNode('description', 'Adds retry logic to methods using a Groovy AST Transformation')
+        root.appendNode('name', 'Retry AST')
+        root.appendNode('url', 'https://github.com/aataylor95/retry-ast')
+        root.children().last() + pomConfig
+      }
+    }
+  }
+}
+
+bintray {
+  user = "aataylor95"
+  key = System.getenv('BINTRAY_KEY')
+  publications = ['mavenPublication']
+  dryRun = false
+  publish = true
+  override = false
+  
+  pkg {
+    repo = 'maven'
+    name = 'retry-ast'
+    licenses = ['WTFPL']
+    vcsUrl = 'https://github.com/aataylor95/retry-ast.git'
+    version {
+      name = '1.0.0'
+      desc = 'Adds retry logic to methods using a Groovy AST Transformation'
+      released = new Date()
+      vcsTag = '1.0.0'
+    }
+  }
 }
