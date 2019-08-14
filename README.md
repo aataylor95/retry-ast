@@ -1,5 +1,24 @@
 # **\@Retry** - retry-ast
 
+```
+class TemperamentalService {
+  Integer counter = 0
+
+  @Retry
+  Integer doIt() {
+    if (counter == 0) {
+     counter++
+     throw new Exception()
+    }
+
+    return counter
+ }
+
+Integer retries = new TemperamentalService().doIt()
+
+assert retries == 1
+```
+
 Catches exceptions and employs retry logic. Useful for things with an expected fault tolerance like S3 calls or other network traffic.
 
 Works by injecting an overloaded method (wrapped in try/catch) with a retry count parameter and also wrapping exisiting method in a try/catch which can call the overloaded method N.B. The retry count parameter is named '$retryCount'; you should avoid using this variable name if you want to use this annotation.
