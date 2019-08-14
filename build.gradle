@@ -97,9 +97,13 @@ publishing {
   }
 }
 
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
 bintray {
-  user = "aataylor95"
-  key = System.getenv('BINTRAY_KEY')
+  user = properties.getProperty("bintray.user")
+  key = properties.getProperty("bintray.apikey")
+  
   publications = ['mavenPublication']
   dryRun = false
   publish = true
@@ -110,6 +114,10 @@ bintray {
     name = 'retry-ast'
     licenses = ['WTFPL']
     vcsUrl = 'https://github.com/aataylor95/retry-ast.git'
+    githubRepo = 'aataylor95/retry-ast'
+    githubReleaseNotesFile = 'README.md'
+    userOrg = 'aataylor95'
+    
     version {
       name = '1.0.0'
       desc = 'Adds retry logic to methods using a Groovy AST Transformation'
