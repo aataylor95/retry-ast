@@ -52,6 +52,9 @@ artifacts {
   archives javadocJar
 }
 
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
 def pomConfig = {
   licenses {
     license {
@@ -62,14 +65,14 @@ def pomConfig = {
   }
   developers {
     developer {
-      id "aataylor95"
-      email "a.taylor95@hotmail.com"
+      id properties.getProperty("bintrayUser")
+      email properties.getProperty("email")
       name "Adam Taylor"
     }
   }
 
   scm {
-    url "https://github.com/aataylor95/retry-ast"
+    url projectRepo
   }
 }
 
@@ -85,24 +88,21 @@ publishing {
       }
       groupId group
       artifactId projectName
-      version '1.0.1'
+      version projectVersion
       pom.withXml {
         def root = asNode()
         root.appendNode('description', 'Adds retry logic to methods using a Groovy AST Transformation')
         root.appendNode('name', 'Retry AST')
-        root.appendNode('url', 'https://github.com/aataylor95/retry-ast')
+        root.appendNode('url', projectRepo)
         root.children().last() + pomConfig
       }
     }
   }
 }
 
-Properties properties = new Properties()
-properties.load(project.rootProject.file('local.properties').newDataInputStream())
-
 bintray {
-  user = properties.getProperty("bintray.user")
-  key = properties.getProperty("bintray.apikey")
+  user = properties.getProperty("bintrayUser")
+  key = properties.getProperty("bintrayApikey")
   
   publications = ['mavenPublication']
   dryRun = false
@@ -113,16 +113,15 @@ bintray {
     repo = 'maven'
     name = 'retry-ast'
     licenses = ['WTFPL']
-    vcsUrl = 'https://github.com/aataylor95/retry-ast.git'
+    vcsUrl = projectRepo
     githubRepo = 'aataylor95/retry-ast'
     githubReleaseNotesFile = 'README.md'
-    userOrg = 'aataylor95'
     
     version {
-      name = '1.0.1'
+      name = projectVersion
       desc = 'Adds retry logic to methods using a Groovy AST Transformation'
       released = new Date()
-      vcsTag = '1.0.1'
+      vcsTag = projectVersion
     }
   }
 }
