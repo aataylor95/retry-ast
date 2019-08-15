@@ -23,7 +23,7 @@ repositories {
 }
 
 dependencies {
-  compile 'com.github.aataylor95.ast:retry-ast:1.0.2'
+  compile 'com.github.aataylor95.ast:retry-ast:1.1.0'
 }
 ```
 
