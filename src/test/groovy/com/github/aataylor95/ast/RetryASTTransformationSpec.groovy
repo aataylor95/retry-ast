@@ -122,10 +122,8 @@ class RetryASTTransformationSpec extends Specification {
 
         return new TemperamentalService().doIt()
       '''
-    when:
-      boolean succeeded = shell.evaluate(text)
-    then:
-      succeeded
+    expect:
+      shell.evaluate(text)
   }
 
   void "don't catch non-specified exceptions if includes is defined"() {
@@ -209,10 +207,8 @@ class RetryASTTransformationSpec extends Specification {
 
         return new TemperamentalService().doIt()
       '''
-    when:
-      boolean succeeded = shell.evaluate(text)
-    then:
-      succeeded
+    expect:
+      shell.evaluate(text)
   }
 
   void "can't have non-exceptions in the includes/excludes list"() {
@@ -284,5 +280,35 @@ class RetryASTTransformationSpec extends Specification {
       e.errorCollector.errorCount == 2
       e.message.contains("'includes' contains Classes that aren't Throwables: [String]")
       e.message.contains("'maxRetries' must be a positive integer")
+  }
+
+  void "wait an arbitrary time period before retrying"() {
+    given:
+      String text = '''
+        import com.github.aataylor95.ast.Retry
+      
+        class TemperamentalService {
+         long beforeDelay = 0
+        
+         @Retry(delayInMillis = 3000)
+         Integer doIt() {
+           //println "Attempt ${counter + 1}"
+           
+           if (beforeDelay == 0) {
+            beforeDelay = System.currentTimeMillis()
+            throw new Exception()
+           }
+           
+           return System.currentTimeMillis() - beforeDelay
+         }
+        }
+        
+        return new TemperamentalService().doIt()
+      '''
+    when:
+      Integer delay = shell.evaluate(text)
+    then:
+      delay > 3000
+      delay < 4000
   }
 }

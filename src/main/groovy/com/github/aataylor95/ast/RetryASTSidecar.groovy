@@ -7,6 +7,7 @@ import org.codehaus.groovy.ast.Parameter
 import org.codehaus.groovy.ast.expr.Expression
 import org.codehaus.groovy.ast.stmt.BlockStatement
 import org.codehaus.groovy.ast.stmt.CatchStatement
+import org.codehaus.groovy.ast.stmt.Statement
 import org.codehaus.groovy.ast.stmt.TryCatchStatement
 
 import static org.codehaus.groovy.ast.ClassHelper.make
@@ -28,11 +29,19 @@ class RetryASTSidecar {
   }
 
   //Will call retry method with $retryCount + 1
-  static BlockStatement createRetryCall(MethodNode method, boolean initialMethod = false) {
+  static BlockStatement createRetryCall(MethodNode method, Integer delayInMillis, boolean initialMethod = false) {
     List<Expression> parameters = method.parameters.collect { varX(it.name) }
     parameters << (initialMethod ? constX(0) : plusX(varX(RETRIES), constX(1)))
 
-    return block(stmt(callThisX(method.name, args(parameters))))
+    Statement methodCall = stmt(callThisX(method.name, args(parameters)))
+
+    if (delayInMillis) {
+      Statement threadSleep = stmt(callX(make(Thread), 'sleep', args(constX(delayInMillis))))
+
+      return block(threadSleep, methodCall)
+    }
+
+    return block(methodCall)
   }
 
   //Wrap existing method statements in a try/catch

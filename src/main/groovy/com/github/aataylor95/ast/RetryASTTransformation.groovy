@@ -12,8 +12,8 @@ import org.codehaus.groovy.control.SourceUnit
 import org.codehaus.groovy.transform.AbstractASTTransformation
 import org.codehaus.groovy.transform.GroovyASTTransformation
 
+import static com.github.aataylor95.ast.RetryASTSidecar.*
 import static org.codehaus.groovy.ast.tools.GeneralUtils.block
-import static RetryASTSidecar.*
 
 @GroovyASTTransformation(phase=CompilePhase.CANONICALIZATION)
 class RetryASTTransformation extends AbstractASTTransformation {
@@ -28,24 +28,35 @@ class RetryASTTransformation extends AbstractASTTransformation {
     //TODO: Why is it null when nothing is set, when default is 1?
     Integer maxRetries = getMemberIntValue(anno, 'maxRetries') ?: 1
 
+    Integer delayInMillis = getMemberIntValue(anno, 'delayInMillis')
+    List<ClassNode> includes = getMemberClassList(anno, 'includes')
+    List<ClassNode> excludes = getMemberClassList(anno, 'excludes')
+
+    //#region Parameter Validation
     Closure error = this.&addError.rcurry(method)
 
     if (maxRetries < 0) {
       error("'maxRetries' must be a positive integer")
     }
 
-    List<ClassNode> includes = getMemberClassList(anno, 'includes')
-    List<ClassNode> excludes = getMemberClassList(anno, 'excludes')
+    if (delayInMillis && delayInMillis < 0) {
+      error("'delayInMillis' must be a positive integer")
+    }
 
     reportClassError(includes, 'includes', error)
     reportClassError(excludes, 'excludes', error)
 
+    if (includes && excludes) {
+      error("'includes' & 'excludes' are both defined, only one should be defined")
+    }
+
     if (sourceUnit.errorCollector.errorCount) return
+    //#endregion
 
     MethodNode retryMethod = createRetryMethod(method)
 
-    BlockStatement initialRetryCall = createRetryCall(method, true)
-    BlockStatement retryCall = createRetryCall(method)
+    BlockStatement initialRetryCall = createRetryCall(method, delayInMillis, true)
+    BlockStatement retryCall = createRetryCall(method, delayInMillis)
 
     TryCatchStatement initialTryCatch = createTryCatch(method)
     TryCatchStatement retryTryCatch = createTryCatch(retryMethod)
