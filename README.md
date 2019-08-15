@@ -12,6 +12,8 @@ By default will catch any *Exception* and use retry logic once, but has paramete
   * List of *Throwables* that will be caught and retried. Other exceptions will still throw.
 * *excludes*
   * List of *Throwables* that will **not** be caught and retried. Other exceptions will not throw.
+* *delayInMillis*
+  * How long it will wait before attempting a retry. By default will not wait.
 
 # Usage
 
