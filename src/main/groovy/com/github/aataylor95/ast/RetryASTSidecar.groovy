@@ -4,6 +4,7 @@ import org.apache.groovy.ast.tools.ClassNodeUtils
 import org.codehaus.groovy.ast.ClassNode
 import org.codehaus.groovy.ast.MethodNode
 import org.codehaus.groovy.ast.Parameter
+import org.codehaus.groovy.ast.expr.BinaryExpression
 import org.codehaus.groovy.ast.expr.Expression
 import org.codehaus.groovy.ast.stmt.BlockStatement
 import org.codehaus.groovy.ast.stmt.CatchStatement
@@ -51,19 +52,21 @@ class RetryASTSidecar {
 
   //Create a catch for exception that retries
   static CatchStatement createCatchRetry(ClassNode exception, BlockStatement retryCall, Integer maxRetries = null) {
-    String exceptionName = exceptionName(exception)
+    String exceptionName = name(exception)
     Parameter exceptionParam = param(exception, exceptionName)
 
-    if (!maxRetries) {
-      return catchS(exceptionParam, retryCall)
+    if (maxRetries) {
+      BinaryExpression retryCountLessThanMax = ltX(varX(RETRIES), constX(maxRetries - 1))
+
+      return catchS(exceptionParam, ifElseS(retryCountLessThanMax, retryCall, throwS(varX(exceptionName))))
     }
 
-    return catchS(exceptionParam, ifElseS(ltX(varX(RETRIES), constX(maxRetries - 1)), retryCall, throwS(varX(exceptionName))))
+    return catchS(exceptionParam, retryCall)
   }
 
   //Create a catch for exception that re-throws exception; for retrying all exceptions except excludes
   static CatchStatement createCatchThrow(ClassNode exception) {
-    String exceptionName = exceptionName(exception)
+    String exceptionName = name(exception)
 
     return catchS(param(exception, exceptionName), throwS(varX(exceptionName)))
   }
@@ -80,7 +83,7 @@ class RetryASTSidecar {
     }
   }
 
-  private static String exceptionName(ClassNode exception) {
-    return exception.nameWithoutPackage.uncapitalize()
+  private static String name(ClassNode clazz) {
+    return clazz.nameWithoutPackage.uncapitalize()
   }
 }
