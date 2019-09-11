@@ -22,7 +22,7 @@ class RetryASTSidecar {
   static MethodNode createRetryMethod(MethodNode method) {
     Parameter[] newParams = params(*method.parameters, param(make(Integer), RETRIES))
 
-    MethodNode retryMethod = method.with { new MethodNode(name, modifiers, returnType, newParams, exceptions, method.code) }
+    MethodNode retryMethod = method.with { new MethodNode(name, modifiers, returnType, newParams, exceptions, code) }
 
     ClassNodeUtils.addGeneratedMethod(method.declaringClass, retryMethod)
 
